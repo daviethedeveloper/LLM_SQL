@@ -1,0 +1,41 @@
+{
+  "strategy": "zero_shot",
+  "prompt_prefix": "-- Create Vendors table\nCREATE TABLE IF NOT EXISTS Vendors (\n    VendorID INTEGER PRIMARY KEY AUTOINCREMENT,\n    VendorName TEXT NOT NULL,\n    VendorDescription TEXT,\n    VendorPhoneNumber TEXT,\n    VendorCategory TEXT,\n    VendorLocation TEXT\n);\n\n-- Create Products table with foreign key reference to Vendors\nCREATE TABLE IF NOT EXISTS Products (\n    ProductID INTEGER PRIMARY KEY AUTOINCREMENT,\n    ProductName TEXT NOT NULL,\n    ProductPrice REAL NOT NULL,\n    ProductImage TEXT,\n    VendorID INTEGER,\n    FOREIGN KEY (VendorID) REFERENCES Vendors(VendorID)\n);\n\n-- Create Ratings table with foreign key reference to Vendors\nCREATE TABLE IF NOT EXISTS Ratings (\n    RatingID INTEGER PRIMARY KEY AUTOINCREMENT,\n    VendorID INTEGER,\n    CustomerName TEXT NOT NULL,\n    RatingValue REAL NOT NULL,\n    RatingDate DATE NOT NULL,\n    FOREIGN KEY (VendorID) REFERENCES Vendors(VendorID)\n);\n\n-- Create Orders table with foreign key references to Vendors and Products\nCREATE TABLE IF NOT EXISTS Orders (\n    OrderID INTEGER PRIMARY KEY AUTOINCREMENT,\n    VendorID INTEGER,\n    ProductID INTEGER,\n    Quantity INTEGER NOT NULL,\n    OrderDate DATE NOT NULL,\n    FOREIGN KEY (VendorID) REFERENCES Vendors(VendorID),\n    FOREIGN KEY (ProductID) REFERENCES Products(ProductID)\n);\n Give me a sqlite select statement that answers the question. Only respond with sqlite syntax.",
+  "questionResults": [
+    {
+      "question": "Which vendors sell products priced over $10?",
+      "sql": "SELECT DISTINCT Vendors.VendorName\nFROM Vendors\nINNER JOIN Products\nON Vendors.VendorID = Products.VendorID\nWHERE Products.ProductPrice > 10;",
+      "queryRawResponse": "[('Pura Vida Tienda',)]",
+      "friendlyResponse": "The vendor that sells products priced over $10 is Pura Vida Tienda.",
+      "error": "None"
+    },
+    {
+      "question": "Which vendors have the lowest rating?",
+      "sql": "SELECT Vendors.VendorID, Vendors.VendorName, MIN(Ratings.RatingValue) as LowestRating\nFROM Vendors\nJOIN Ratings ON Vendors.VendorID = Ratings.VendorID\nGROUP BY Vendors.VendorID, Vendors.VendorName\nORDER BY LowestRating ASC;",
+      "queryRawResponse": "[(3, 'Mercado Flores', 3.5), (4, 'McDonalds', 3.5), (1, 'Panader\u00eda El Salvador', 4.5), (2, 'El Rinc\u00f3n del Caf\u00e9', 4.5), (5, 'Pura Vida Tienda', 4.8)]",
+      "friendlyResponse": "The vendors with the lowest rating are Mercado Flores and McDonalds, both with a rating of 3.5.",
+      "error": "None"
+    },
+    {
+      "question": "Which vendors are located in Mexico City?",
+      "sql": "SELECT * FROM Vendors\nWHERE VendorLocation = 'Mexico City';",
+      "queryRawResponse": "[]",
+      "friendlyResponse": "Sure, it appears that there are currently no vendors listed in our records for Mexico City.",
+      "error": "None"
+    },
+    {
+      "question": "What products are sold in Antigua Guatemala?",
+      "sql": "SELECT Products.ProductName\nFROM Products\nINNER JOIN Vendors ON Products.VendorID = Vendors.VendorID\nWHERE Vendors.VendorLocation = 'Antigua Guatemala';",
+      "queryRawResponse": "[('Espresso',), ('Caf\u00e9 Latte',)]",
+      "friendlyResponse": "In Antigua Guatemala, you can buy products such as Espresso and Caf\u00e9 Latte.",
+      "error": "None"
+    },
+    {
+      "question": "Which customers gave a 2-star rating?",
+      "sql": "SELECT CustomerName \nFROM Ratings \nWHERE RatingValue = 2;",
+      "queryRawResponse": "[]",
+      "friendlyResponse": "Sure, it appears that no customers have given a 2-star rating at this time.",
+      "error": "None"
+    }
+  ]
+}
