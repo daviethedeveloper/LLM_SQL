@@ -1,5 +1,6 @@
 import json
 import openai
+from openai import OpenAI
 import os
 import sqlite3
 from time import time
@@ -44,17 +45,15 @@ def runSql(query):
 configPath = getPath("config.json")  
 with open(configPath) as configFile:
     config = json.load(configFile)
-
-openai.api_key = config["openaiKey"]  # Correct way to set the OpenAI API key
+client = OpenAI(api_key=config["openaiKey"])
+  # Correct way to set the OpenAI API key
 openai.organization = config["orgId"]  # Set the organization ID
 
 def getChatGptResponse(content):
-    response = openai.ChatCompletion.create(
-        model="gpt-4",  # Specify the correct model
-        messages=[{"role": "user", "content": content}]
-    )
+    response = client.chat.completions.create(model="gpt-4",  # Specify the correct model
+    messages=[{"role": "user", "content": content}])
 
-    result = response.choices[0].message['content'].strip()
+    result = response.choices[0].message.content.strip()
     return result
 
 # Define your prompt strategies here, related to your database schema
@@ -70,11 +69,11 @@ strategies = {
 
 
 questions = [
-    "Which vendors sell products priced over $20?",
-    "Which vendors have the highest rating?",
-    "Which vendors are located in Guatemala City?",
+    "Which vendors sell products priced over $10?",
+    "Which vendors have the lowest rating?",
+    "Which vendors are located in Mexico City?",
     "What products are sold in Antigua Guatemala?",
-    "Which customers gave a 5-star rating?",
+    "Which customers gave a 2-star rating?",
 ]
 
 def sanitizeForJustSql(value):
